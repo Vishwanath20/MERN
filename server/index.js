@@ -11,7 +11,7 @@ app.use(express.json());
 
 // Sample API route
 app.get("/api/hello", (req, res) => {
-  res.json({ message: "Hello from Node backend!" });
+  res.json({ message: "Hello from Node.js backend!" });
 });
 
 // Example: API returning a list
