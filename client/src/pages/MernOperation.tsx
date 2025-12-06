@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { ThemeContext } from '../contexts/ThemeContext';
 
-const HomePage = () => {
+const MernOperation = () => {
   const { theme } = useContext(ThemeContext);
 
   return (
@@ -10,7 +10,7 @@ const HomePage = () => {
       <div className={`${theme === 'dark' ? 'bg-dark' : 'bg-light'} rounded-lg p-5 mb-5 border ${theme === 'dark' ? 'border-secondary' : 'border-light'}`}>
         <h1 className={`display-4 fw-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>Welcome to MERN Application</h1>
         <p className={`lead ${theme === 'dark' ? 'text-light' : 'text-secondary'}`}>
-          This is a modern full-stack web application built with MongoDB, Express, React, and Node.js.
+          MERN OPERATION
         </p>
       </div>
 
@@ -82,4 +82,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default MernOperation;

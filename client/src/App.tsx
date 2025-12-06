@@ -1,21 +1,23 @@
-import { useState } from "react";
-import { ThemeContext } from "./ThemeContext";
-import Layout from "./components/Layout";
-import HomePage from "./pages/HomePage";
-import './index.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './providers/ThemeProvider';
+import { Layout } from './components/Layout';
+import HomePage from './pages/HomePage';
+import MernOperation from './pages/MernOperation';
 
-export default function App() {
-  const [theme, setTheme] = useState<'light'|'dark'>('light');
-
-  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
-
+function App() {
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div className={`${theme === 'dark' ? 'dark' : ''} transition-colors duration-500`}>
+    <ThemeProvider>
+      <Router>
         <Layout>
-          <HomePage />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+             <Route path="/mern" element={<MernOperation />} />
+            {/* Add more routes here */}
+          </Routes>
         </Layout>
-      </div>
-    </ThemeContext.Provider>
+      </Router>
+    </ThemeProvider>
   );
 }
+
+export default App;
