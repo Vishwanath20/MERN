@@ -1,84 +1,105 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { ThemeContext } from '../contexts/ThemeContext';
+import UserFormModal, { type User } from '../components/UserFormModal';
+
+const mockUsers = [
+  { id: 1, name: 'John Doe', email: 'john.doe@example.com', role: 'Admin' },
+  { id:2, name: 'Jane Smith', email: 'jane.smith@example.com', role: 'User' },
+  { id: 3, name: 'Peter Jones', email: 'peter.jones@example.com', role: 'User' },
+  { id: 4, name: 'Susan Williams', email: 'susan.w@example.com', role: 'Editor' },
+];
+
+const emptyUser: User = { id: null, name: '', email: '', role: 'User' };
 
 const MernOperation = () => {
   const { theme } = useContext(ThemeContext);
+  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [showModal, setShowModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User>(emptyUser);
+
+  const handleAddUser = () => {
+    setCurrentUser(emptyUser);
+    setShowModal(true);
+  };
+
+  const handleEditUser = (user: User) => {
+    setCurrentUser(user);
+    setShowModal(true);
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setCurrentUser(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleDelete = (userId: number) => {
+    setUsers(users.filter(user => user.id !== userId && user.id !== null));
+  };
+
+  const handleSaveUser = (user: User) => {
+    if (user.id) {
+      // Update existing user
+      setUsers(users.map(u => (u.id === user.id ? user : u)));
+    } else {
+      // Add new user
+      const newUser = { ...user, id: new Date().getTime() }; // Use timestamp for unique ID
+      setUsers([...users, newUser]);
+    }
+    setShowModal(false);
+  };
 
   return (
-    <div>
-      {/* Hero Section */}
-      <div className={`${theme === 'dark' ? 'bg-dark' : 'bg-light'} rounded-lg p-5 mb-5 border ${theme === 'dark' ? 'border-secondary' : 'border-light'}`}>
-        <h1 className={`display-4 fw-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>Welcome to MERN Application</h1>
-        <p className={`lead ${theme === 'dark' ? 'text-light' : 'text-secondary'}`}>
-          MERN OPERATION
-        </p>
+    <>
+      <UserFormModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        onSave={handleSaveUser}
+        user={currentUser}
+        onChange={handleFormChange}
+      />
+      <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="fw-bold">User Management</h2>
+        <button className="btn btn-primary" onClick={handleAddUser}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-plus-circle-fill me-2" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+          </svg>
+          Add User
+        </button>
       </div>
 
-      {/* Features Section */}
-      <div className="row mb-5">
-        {/* Feature 1 - Frontend */}
-        <div className="col-md-4 mb-3">
-          <div className={`card h-100 ${theme === 'dark' ? 'bg-dark border-secondary' : 'bg-white border-light'}`}>
-            <div className="card-body">
-              <h5 className={`card-title text-primary fw-bold ${theme === 'dark' ? 'text-info' : ''}`}>
-                <svg className="bi me-2" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.71l-5.223 2.206A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z" />
-                </svg>
-                Frontend
-              </h5>
-              <p className={`card-text ${theme === 'dark' ? 'text-light' : 'text-secondary'}`}>
-                Built with React, TypeScript, Vite, and Tailwind CSS for a fast and modern UI.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Feature 2 - Backend */}
-        <div className="col-md-4 mb-3">
-          <div className={`card h-100 ${theme === 'dark' ? 'bg-dark border-secondary' : 'bg-white border-light'}`}>
-            <div className="card-body">
-              <h5 className={`card-title text-success fw-bold ${theme === 'dark' ? 'text-success' : ''}`}>
-                <svg className="bi me-2" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2z" />
-                </svg>
-                Backend
-              </h5>
-              <p className={`card-text ${theme === 'dark' ? 'text-light' : 'text-secondary'}`}>
-                Powered by Node.js and Express server for robust API endpoints and business logic.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Feature 3 - Database */}
-        <div className="col-md-4 mb-3">
-          <div className={`card h-100 ${theme === 'dark' ? 'bg-dark border-secondary' : 'bg-white border-light'}`}>
-            <div className="card-body">
-              <h5 className={`card-title text-danger fw-bold ${theme === 'dark' ? 'text-danger' : ''}`}>
-                <svg className="bi me-2" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M8 1c-1.573 0-3.022.289-4.096.777C2.75 2.075 2 2.418 2 2.5s.75.425 1.904.723C5.978 3.711 7.427 4 8 4s2.022-.289 3.096-.777C12.25 2.925 13 2.582 13 2.5s-.75-.425-1.904-.723C10.022 1.289 8.573 1 8 1z" />
-                </svg>
-                Database
-              </h5>
-              <p className={`card-text ${theme === 'dark' ? 'text-light' : 'text-secondary'}`}>
-                MongoDB for flexible document storage and Mongoose for elegant object modeling.
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="table-responsive">
+        <table className={`table table-hover ${theme === 'dark' ? 'table-dark' : 'table-light'}`}>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Email</th>
+              <th scope="col">Role</th>
+              <th scope="col" className="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user, index) => (
+              <tr key={user.id}>
+                <th scope="row">{index + 1}</th>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>
+                  <span className={`badge ${user.role === 'Admin' ? 'bg-success' : 'bg-info'}`}>{user.role}</span>
+                </td>
+                <td className="text-end">
+                  <button className="btn btn-sm btn-outline-primary me-2" onClick={() => handleEditUser(user)}>Edit</button>
+                  {user.id !== null && (
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(user.id!)}>Delete</button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      {/* Call to Action */}
-      <div className={`alert text-center py-4 ${
-        theme === 'dark' 
-          ? 'alert-info' 
-          : 'alert-primary'
-      }`}>
-        <h4 className={`mb-2 fw-bold ${theme === 'dark' ? 'text-dark' : ''}`}>Ready to Get Started?</h4>
-        <p className={`mb-3 ${theme === 'dark' ? 'text-dark' : ''}`}>Explore our features and build amazing applications with MERN stack.</p>
-        <button className="btn btn-primary mt-2">Learn More</button>
-      </div>
-    </div>
+    </div></>
   );
 };
 
