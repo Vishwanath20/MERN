@@ -13,6 +13,7 @@ export function useResumeUpload() {
     try {
       const result = await uploadResume(file, token);
       return result;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message || "Upload failed");
       throw err;
