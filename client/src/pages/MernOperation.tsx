@@ -1,29 +1,45 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { ThemeContext } from '../contexts/ThemeContext';
 import UserFormModal, { type User } from '../components/UserFormModal';
 
-const mockUsers = [
-  { id: 1, name: 'John Doe', email: 'john.doe@example.com', role: 'Admin' },
-  { id:2, name: 'Jane Smith', email: 'jane.smith@example.com', role: 'User' },
-  { id: 3, name: 'Peter Jones', email: 'peter.jones@example.com', role: 'User' },
-  { id: 4, name: 'Susan Williams', email: 'susan.w@example.com', role: 'Editor' },
-];
+const API_URL = 'http://localhost:5000/api/users';
 
-const emptyUser: User = { id: null, name: '', email: '', role: 'User' };
+const emptyUser: User = { name: '', email: '', role: 'User' };
 
 const MernOperation = () => {
   const { theme } = useContext(ThemeContext);
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [currentUser, setCurrentUser] = useState<User>(emptyUser);
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) {
+        // If response is not OK, throw an error to be caught by the catch block
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleAddUser = () => {
     setCurrentUser(emptyUser);
+    setServerError(null); // Clear previous errors
     setShowModal(true);
   };
 
   const handleEditUser = (user: User) => {
     setCurrentUser(user);
+    setServerError(null); // Clear previous errors
     setShowModal(true);
   };
 
@@ -32,30 +48,54 @@ const MernOperation = () => {
     setCurrentUser(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleDelete = (userId: number) => {
-    setUsers(users.filter(user => user.id !== userId && user.id !== null));
+  const handleDelete = async (userId: string) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        await fetch(`${API_URL}/${userId}`, { method: 'DELETE' });
+        fetchUsers(); // Refetch users to update the list
+      } catch (error) {
+        console.error('Failed to delete user:', error);
+      }
+    }
   };
 
-  const handleSaveUser = (user: User) => {
-    if (user.id) {
-      // Update existing user
-      setUsers(users.map(u => (u.id === user.id ? user : u)));
-    } else {
-      // Add new user
-      const newUser = { ...user, id: new Date().getTime() }; // Use timestamp for unique ID
-      setUsers([...users, newUser]);
+  const handleSaveUser = async (user: User) => {
+    console.log('>>>Saving user:', user);
+    setServerError(null); // Reset error on new submission
+    try {
+      const method = user._id ? 'PUT' : 'POST';
+      const url = user._id ? `${API_URL}/${user._id}` : API_URL;
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save user');
+      }
+
+      setShowModal(false);
+      fetchUsers(); // Refetch users to reflect changes
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      setServerError(errorMessage);
+      console.error('Failed to save user:', errorMessage);
     }
-    setShowModal(false);
   };
 
   return (
     <>
       <UserFormModal
+        key={currentUser._id || 'new-user'}
         show={showModal}
         onHide={() => setShowModal(false)}
         onSave={handleSaveUser}
         user={currentUser}
         onChange={handleFormChange}
+        serverError={serverError}
       />
       <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -81,7 +121,7 @@ const MernOperation = () => {
           </thead>
           <tbody>
             {users.map((user, index) => (
-              <tr key={user.id}>
+              <tr key={user._id}>
                 <th scope="row">{index + 1}</th>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
@@ -90,8 +130,8 @@ const MernOperation = () => {
                 </td>
                 <td className="text-end">
                   <button className="btn btn-sm btn-outline-primary me-2" onClick={() => handleEditUser(user)}>Edit</button>
-                  {user.id !== null && (
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(user.id!)}>Delete</button>
+                  {user._id && (
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(user._id!)}>Delete</button>
                   )}
                 </td>
               </tr>

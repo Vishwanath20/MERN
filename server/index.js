@@ -3,11 +3,12 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
@@ -19,21 +20,12 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.log("DB Error:", err));
 
-  // Sample API route
-  app.get("/", (req, res) => {
-    res.send("Server is working with MongoDB 🎉");
-  });
+// API Routes
+app.use('/api/users', userRoutes);
 
-app.get("/api/hello", (req, res) => {
-  res.json({ message: "Hello from Node.js backend!" });
-});
-
-// Example: API returning a list
-app.get("/api/users", (req, res) => {
-  res.json([
-    { id: 1, name: "Alice" },
-    { id: 2, name: "Bob" },
-  ]);
+// Sample root route
+app.get("/", (req, res) => {
+  res.send("Server is working with MongoDB 🎉");
 });
 
 // Start server

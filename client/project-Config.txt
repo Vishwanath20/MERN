@@ -1,4 +1,5 @@
 mongo
+https://cloud.mongodb.com/v2/6932a3672f98a12c72ba8aa1#/overview
 
 connection string
 mongodb+srv://admin:admin@cluster0.vkvgote.mongodb.net/?appName=Cluster0
@@ -8,5 +9,9 @@ visupater@gmail.com / 786923@Vishu
 
 mongo user
 admin / admin
+
+mongo ip address page
+https://cloud.mongodb.com/v2/6932a3672f98a12c72ba8aa1#/security/network/accessList
+
 
 
