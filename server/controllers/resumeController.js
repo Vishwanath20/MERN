@@ -1,41 +1,27 @@
-import { analyzeResumeWithAI } from "../services/resumeAIService.js";
+// server/controllers/resumeController.js
+import fs from "fs";
+import { processResume } from "../services/resumeAIService.js";
 
-// upload resume
 export const uploadResume = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: "No file uploaded" });
-    }
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
 
-    // Return file ID (we use filename as ID)
-    res.json({
-      success: true,
-      id: req.file.filename,
-      message: "Resume uploaded"
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: "Upload failed" });
-  }
-};
+    const filePath = req.file.path;
 
+    const { text, analysis } = await processResume(filePath);
 
-//analyze resume controller
-export async function analyzeResume(req, res) {
-  try {
-    if (!req.file)
-      return res.status(400).json({ success: false, error: "No file uploaded" });
-
-    const aiResult = await analyzeResumeWithAI(
-      req.file.path,
-      req.file.originalname
-    );
+    // remove local file after processing
+    fs.unlinkSync(filePath);
 
     return res.json({
-      success: true,
-      analysis: aiResult
+      id: Date.now(),
+      text,
+      analysis,
     });
   } catch (err) {
-    return res.status(500).json({ success: false, error: err.message });
+    return res.status(500).json({
+      message: "Failed to process resume",
+      error: err.message,
+    });
   }
-}
+};

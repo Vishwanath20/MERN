@@ -1,60 +1,46 @@
+// server/services/resumeAIService.js
+import pdfParse from "pdf-parse";
 import fs from "fs";
-import path from "path";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { OpenAI } from "openai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-export async function analyzeResumeWithAI(filePath, originalName) {
-  try {
-    const ext = path.extname(originalName).toLowerCase();
-
-    const mimeType =
-      ext === ".pdf"
-        ? "application/pdf"
-        : ext === ".doc"
-        ? "application/msword"
-        : ext === ".docx"
-        ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        : null;
-
-    if (!mimeType) throw new Error("Unsupported file type");
-
-    const fileBuffer = fs.readFileSync(filePath);
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash"
-    });
-
-    const prompt = `
-You are an AI Resume Reviewer. Return ONLY the following JSON:
-
-{
-  "ats_score": number,
-  "strengths": [],
-  "weaknesses": [],
-  "recommendations": [],
-  "job_fit_summary": ""
+// Extract text from PDF
+async function extractPDFText(filePath) {
+  const buffer = fs.readFileSync(filePath);
+  const data = await pdfParse(buffer);
+  return data.text;
 }
-`;
 
-    const result = await model.generateContent([
-      { text: prompt },
-      {
-        inlineData: {
-          mimeType,
-          data: fileBuffer.toString("base64"),
-        },
-      },
-    ]);
+// TODO: Add DOC/DOCX extraction later
+export async function analyzeResumeAI(text) {
+  const prompt = `
+    Analyze the following resume text and return JSON ONLY.
+    Structure:
+    {
+      "strengths": [...],
+      "weaknesses": [...],
+      "atsScore": number (0-100),
+      "recommendations": [...],
+      "summary": "short summary"
+    }
+    Resume text:
+    ${text}
+  `;
 
-    let text = result.response.text();
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+  const response = await openai.chat.completions.create({
+    model: "gpt-4.1",
+    messages: [{ role: "user", content: prompt }],
+  });
 
-    return JSON.parse(text);
-  } catch (error) {
-    console.error("AI Resume Analysis Error:", error);
-    throw new Error("AI processing failed");
-  } finally {
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  }
+  return JSON.parse(response.choices[0].message.content);
+}
+
+export async function processResume(filePath) {
+  const text = await extractPDFText(filePath);
+  const analysis = await analyzeResumeAI(text);
+
+  return { text, analysis };
 }
