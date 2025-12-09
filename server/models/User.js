@@ -1,12 +1,15 @@
-import mongoose from "mongoose";
+// server/models/User.js
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  role: { type: String, required: true, default: 'User' },
-}, {
-  timestamps: true // Automatically adds createdAt and updatedAt fields
-});
+  role: {
+    type: String,
+    enum: ['User', 'Admin'],
+    default: 'User',
+  },
+}, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
 
