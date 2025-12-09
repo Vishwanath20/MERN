@@ -10,8 +10,72 @@ visupater@gmail.com / 786923@Vishu
 mongo user
 admin / admin
 
-mongo ip address page
-https://cloud.mongodb.com/v2/6932a3672f98a12c72ba8aa1#/security/network/accessList
+--------------------------------------
 
+STEP 1 — Build the ResumeUpload UI
+
+✔ You already have this
+✔ UI is fully responsive, dark mode compatible
+✔ Supports drag/drop + browse
+✔ Shows selected file
+✔ Button + loader
+✔ Ready for backend connection
+
+➡️ Upload UI = COMPLETED
+
+STEP 2 — Build Backend Upload API (Node.js + Express)
+
+This is the next required step.
+
+We need:
+
+✔ Backend route /api/resume/upload
+✔ Accept PDF/DOC/DOCX
+✔ Save file temporarily
+✔ Extract text (using pdf-parse, docx, or LibreOffice)
+✔ Send extracted text to AI model
+✔ Generate:
+
+strengths
+
+weaknesses
+
+ats score
+
+suggestions
+
+➡️ This is what we implement next.
+
+STEP 3 — Connect Frontend Upload → Backend API
+
+Once server API is ready:
+
+Frontend sends file via FormData
+
+Backend responds with { id, analysis, text }
+
+Store in localStorage
+
+Redirect to /analysis
+
+➡️ Integration step
+
+
+STEP 4 — Testing Upload Process
+
+We test:
+
+✔ Upload success
+✔ Invalid file popup
+✔ File > 5MB
+✔ Drag and drop
+✔ API errors
+✔ AI response
+
+--------------------------------------------
+
+visupater@gmail.com
+https://aistudio.google.com/api-keys
+google gemini  api key : AIzaSyABPHDQKTP4b2WLLm8Rx8ZU8Y48IzUDruM
 
 

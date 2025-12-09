@@ -7,7 +7,8 @@ export const Header = () => {
 
   const navItems = [
     { label: 'Home', path: '/' },
-     { label: 'mern', path: '/mern' },
+    { label: 'Mern', path: '/mern' },
+    { label: 'intellihire', path: '/intellihire' },
     { label: 'About', path: '/about' },
     { label: 'Services', path: '/services' },
     { label: 'Contact', path: '/contact' },

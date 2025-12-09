@@ -1,14 +1,15 @@
 // server/index.js
-import express from "express";
+//import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import userRoutes from "./routes/userRoutes.js";
+import app from "./app.js";
 
 dotenv.config();
-
-const app = express();
 const PORT = process.env.PORT || 5000;
+
+//const app = express();
+
 
 // Middleware
 app.use(cors());
