@@ -7,6 +7,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 export async function analyzeResumeWithAI(filePath, originalName) {
   try {
     const ext = path.extname(originalName).toLowerCase();
+    const fileBuffer = fs.readFileSync(filePath);
 
     const mimeType =
       ext === ".pdf"
@@ -19,23 +20,19 @@ export async function analyzeResumeWithAI(filePath, originalName) {
 
     if (!mimeType) throw new Error("Unsupported file type");
 
-    const fileBuffer = fs.readFileSync(filePath);
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash"
-    });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
-You are an AI Resume Reviewer. Return ONLY the following JSON:
+Extract resume insights. Return ONLY JSON:
 
 {
-  "ats_score": number,
+  "atsScore": number,
   "strengths": [],
   "weaknesses": [],
   "recommendations": [],
-  "job_fit_summary": ""
+  "jobFitSummary": ""
 }
-`;
+    `;
 
     const result = await model.generateContent([
       { text: prompt },
@@ -48,11 +45,11 @@ You are an AI Resume Reviewer. Return ONLY the following JSON:
     ]);
 
     let text = result.response.text();
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    text = text.replace(/```json|```/g, "").trim();
 
     return JSON.parse(text);
-  } catch (error) {
-    console.error("AI Resume Analysis Error:", error);
+  } catch (err) {
+    console.error("AI Error:", err);
     throw new Error("AI processing failed");
   } finally {
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);

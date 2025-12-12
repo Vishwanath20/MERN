@@ -1,41 +1,31 @@
 import { analyzeResumeWithAI } from "../services/resumeAIService.js";
 
-// upload resume
-export const uploadResume = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: "No file uploaded" });
-    }
+const analysisStore = new Map(); // TEMP storage
 
-    // Return file ID (we use filename as ID)
-    res.json({
-      success: true,
-      id: req.file.filename,
-      message: "Resume uploaded"
-    });
+export async function uploadResume(req, res) {
+  try {
+    const file = req.file;
+
+    if (!file) return res.status(400).json({ error: "No file uploaded" });
+
+    const aiResult = await analyzeResumeWithAI(file.path, file.originalname);
+
+    const id = Date.now().toString();
+    analysisStore.set(id, aiResult);
+
+    return res.json({ success: true, id });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, error: "Upload failed" });
+    return res.status(500).json({ error: "Upload failed" });
   }
-};
+}
 
+export async function getResumeAnalysis(req, res) {
+  const { id } = req.params;
 
-//analyze resume controller
-export async function analyzeResume(req, res) {
-  try {
-    if (!req.file)
-      return res.status(400).json({ success: false, error: "No file uploaded" });
-
-    const aiResult = await analyzeResumeWithAI(
-      req.file.path,
-      req.file.originalname
-    );
-
-    return res.json({
-      success: true,
-      analysis: aiResult
-    });
-  } catch (err) {
-    return res.status(500).json({ success: false, error: err.message });
+  if (!analysisStore.has(id)) {
+    return res.status(404).json({ error: "No analysis found" });
   }
+
+  res.json(analysisStore.get(id));
 }

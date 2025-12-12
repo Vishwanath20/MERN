@@ -77,4 +77,42 @@ visupater@gmail.com
 https://aistudio.google.com/api-keys
 google gemini  api key : AIzaSyABPHDQKTP4b2WLLm8Rx8ZU8Y48IzUDruM
 
+------------------------------------
+IntelliHire AI — Project Summary Prompt
 
+I am building IntelliHire AI, a full-stack MERN + Gemini AI app.
+Features include:
+
+⭐ Core Features
+
+Resume Upload Page: User uploads PDF/DOC/DOCX
+
+Backend (Node + Express + Multer) handles upload and sends file to Google Gemini AI
+
+Gemini analyzes resume and generates:
+
+Strengths
+
+Weaknesses
+
+ATS Score
+
+Recommendations
+
+Server stores the analysis and returns an ID
+
+⭐ Client (React + Tailwind)
+
+ResumeUploadPage → Upload file → calls /api/resume/upload
+
+After upload, redirect to /intellihire/resume/:id
+
+ResumeAnalysisPage → Fetches analysis → shows cards, progress bar, export PDF button
+
+Dark/light theme support
+
+⭐ Goal / Product Identity
+
+IntelliHire AI – AI-powered career accelerator.
+Smarter interviews. Stronger resumes. Better jobs.
+-------------------------------------------------------------------------------
