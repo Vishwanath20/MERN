@@ -4,10 +4,7 @@ import { analyzeResume, uploadResume } from "../controllers/resumeController.js"
 
 const router = express.Router();
 
-//router.post("/analyze", upload.single("resume"), analyzeResume);
-
-router.get("/:id", analyzeResume);
-
 router.post("/upload", upload.single("resume"), uploadResume);
+router.get("/:id", getResumeAnalysis);
 
 export default router;

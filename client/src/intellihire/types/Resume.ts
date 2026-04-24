@@ -1,15 +1,6 @@
-// client/src/intellihire/types/Resume.ts
-export type ResumeUploadResponse = { id: string };
-
-export type ResumeAnalysis = {
-  id: string;
-  userId?: string;
-  originalFileUrl?: string;
-  extractedText?: string;
-  aiScore: number;
-  summary?: string;
+export interface ResumeAnalysis {
   strengths: string[];
   weaknesses: string[];
-  suggestions: string[];
-  createdAt?: string;
-};
+  recommendations: string[];
+  atsScore: number;
+}

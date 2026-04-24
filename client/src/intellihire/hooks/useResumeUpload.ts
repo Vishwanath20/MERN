@@ -1,26 +1,24 @@
-// client/src/intellihire/hooks/useResumeUpload.ts
 import { useState } from "react";
-import type { ResumeUploadResponse } from "../types/Resume";
 import { uploadResume } from "../services/resumeService";
 
 export function useResumeUpload() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const upload = async (file: File, token?: string): Promise<ResumeUploadResponse> => {
-    setLoading(true);
-    setError(null);
+  async function upload(file: File) {
     try {
-      const result = await uploadResume(file, token);
-      return result;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setLoading(true);
+      setError(null);
+
+      const result = await uploadResume(file);
+      return result; // { success: true, id: "123" }
     } catch (err: any) {
-      setError(err?.message || "Upload failed");
+      setError(err.message);
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return { upload, loading, error };
 }
