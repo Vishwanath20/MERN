@@ -1,6 +1,6 @@
 import express from "express";
 import upload from "../middleware/uploadMiddleware.js";
-import { analyzeResume } from "../controllers/resumeController.js";
+import { analyzeResume, uploadResume } from "../controllers/resumeController.js";
 
 const router = express.Router();
 
