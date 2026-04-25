@@ -63,6 +63,27 @@ jobs:
       
       - name: Deploy to hosting server
         run: |
+          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+          "DEPLOYMENT_PATH=$DEPLOYMENT_PATH" 'bash -s' << 'EOF'
+          set -e
+          
+          # Now $DEPLOYMENT_PATH will have the correct value
+          if [ ! -d "$DEPLOYMENT_PATH" ]; then
+            mkdir -p "$DEPLOYMENT_PATH"
+            cd "$DEPLOYMENT_PATH"
+            git clone https://github.com/${{ github.repository }}.git .
+          else
+            cd "$DEPLOYMENT_PATH"
+            git fetch origin
+            git reset --hard origin/main
+          fi
+          
+          # ... rest of your script ...
+          EOF
+        env:
+          DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/apps/mern-app
+
+        run: |
           ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
           set -e
           
