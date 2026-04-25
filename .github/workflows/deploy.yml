@@ -83,53 +83,7 @@ jobs:
         env:
           DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/apps/mern-app
 
-        run: |
-          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
-          set -e
-          
-          # Navigate to deployment directory
-          if [ ! -d "$DEPLOYMENT_PATH" ]; then
-            mkdir -p "$DEPLOYMENT_PATH"
-            cd "$DEPLOYMENT_PATH"
-            git clone https://github.com/${{ github.repository }}.git .
-          else
-            cd "$DEPLOYMENT_PATH"
-            git fetch origin
-            git reset --hard origin/main
-          fi
-          
-          # Stop current server if running
-          pm2 stop mern-server 2>/dev/null || echo "Server was not running"
-          
-          # Install dependencies
-          echo "📦 Installing server dependencies..."
-          cd "$DEPLOYMENT_PATH/server"
-          npm ci
-          
-          echo "📦 Installing client dependencies..."
-          cd "$DEPLOYMENT_PATH/client"
-          npm ci
-          
-          echo "🔨 Building client..."
-          npm run build
-          
-          # Create/update .env file (you may need to add this manually or via secrets)
-          echo "⚙️  Setting up environment..."
-          cd "$DEPLOYMENT_PATH/server"
-          # Note: Add your .env setup here or manually on server
-          
-          # Start server with PM2
-          echo "🚀 Starting server..."
-          cd "$DEPLOYMENT_PATH"
-          pm2 start server/index.js --name mern-server --env production
-          pm2 save
-          
-          echo "✅ Deployment completed successfully!"
-          pm2 status
-          EOF
-        env:
-          DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/apps/mern-app
-      
+
       - name: Verify deployment
         run: |
           echo "✅ Deployment workflow completed!"
