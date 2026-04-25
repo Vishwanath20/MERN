@@ -1,6 +1,4 @@
 // client/src/intellihire/components/AnalysisCard.tsx
-import React from "react";
-
 interface AnalysisCardProps {
   title: string;
   content: string[];

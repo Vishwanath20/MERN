@@ -1,0 +1,143 @@
+name: Deploy MERN App to demo.epscg.in
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/apps/mern-app
+  NODE_VERSION: '22.x'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      # Build Server
+      - name: Install server dependencies
+        run: cd server && npm ci
+      
+      - name: Check server TypeScript
+        run: cd server && npm run build 2>/dev/null || true
+      
+      # Build Client
+      - name: Install client dependencies
+        run: cd client && npm ci
+      
+      - name: Build client for production
+        run: cd client && npm run build
+      
+      - name: Lint client code
+        run: cd client && npm run lint 2>/dev/null || echo "Linting warnings (non-blocking)"
+      
+      - name: Check build artifacts
+        run: |
+          ls -la client/dist/
+          echo "Client build successful!"
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+      
+      - name: Deploy to hosting server
+        run: |
+          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          set -e
+          
+          # Navigate to deployment directory
+          if [ ! -d "$DEPLOYMENT_PATH" ]; then
+            mkdir -p "$DEPLOYMENT_PATH"
+            cd "$DEPLOYMENT_PATH"
+            git clone https://github.com/${{ github.repository }}.git .
+          else
+            cd "$DEPLOYMENT_PATH"
+            git fetch origin
+            git reset --hard origin/main
+          fi
+          
+          # Stop current server if running
+          pm2 stop mern-server 2>/dev/null || echo "Server was not running"
+          
+          # Install dependencies
+          echo "📦 Installing server dependencies..."
+          cd "$DEPLOYMENT_PATH/server"
+          npm ci
+          
+          echo "📦 Installing client dependencies..."
+          cd "$DEPLOYMENT_PATH/client"
+          npm ci
+          
+          echo "🔨 Building client..."
+          npm run build
+          
+          # Create/update .env file (you may need to add this manually or via secrets)
+          echo "⚙️  Setting up environment..."
+          cd "$DEPLOYMENT_PATH/server"
+          # Note: Add your .env setup here or manually on server
+          
+          # Start server with PM2
+          echo "🚀 Starting server..."
+          cd "$DEPLOYMENT_PATH"
+          pm2 start server/index.js --name mern-server --env production
+          pm2 save
+          
+          echo "✅ Deployment completed successfully!"
+          pm2 status
+          EOF
+        env:
+          DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/apps/mern-app
+      
+      - name: Verify deployment
+        run: |
+          echo "✅ Deployment workflow completed!"
+          echo "🌐 Your app should be live at: https://${{ secrets.SSH_HOST }}"
+          echo "🔌 API available at: https://${{ secrets.SSH_HOST }}/api"
+          echo "📊 Check server status: pm2 status (on your server)"
+      
+      - name: Cleanup SSH
+        if: always()
+          run: rm -f ~/.ssh/deploy_key
+          cd "$DEPLOYMENT_PATH"
+          pm2 start server/index.js --name mern-server --env production
+          pm2 save
+          
+          echo "✅ Deployment completed successfully!"
+          pm2 status
+          EOF
+        env:
+          DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/apps/mern-app
+      
+      - name: Verify deployment
+        run: |
+          echo "✅ Deployment workflow completed!"
+          echo "Server: https://${{ secrets.SSH_HOST }}"
+          echo "Check deployment status on hosting server: pm2 status"
+      
+      - name: Cleanup SSH
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

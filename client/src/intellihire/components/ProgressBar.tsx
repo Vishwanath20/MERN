@@ -1,6 +1,4 @@
 // client/src/intellihire/components/ProgressBar.tsx
-import React from "react";
-
 interface ProgressBarProps {
   label: string;
   value: number; // 0-100
