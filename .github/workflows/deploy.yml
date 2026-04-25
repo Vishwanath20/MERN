@@ -1,12 +1,10 @@
-name: Deploy MERN App to demo.epscg.in
+name: Deploy MERN App to Hostinger
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 env:
   DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/apps/mern-app
@@ -119,25 +117,6 @@ jobs:
           echo "🔌 API available at: https://${{ secrets.SSH_HOST }}/api"
           echo "📊 Check server status: pm2 status (on your server)"
       
-      - name: Cleanup SSH
-        if: always()
-          run: rm -f ~/.ssh/deploy_key
-          cd "$DEPLOYMENT_PATH"
-          pm2 start server/index.js --name mern-server --env production
-          pm2 save
-          
-          echo "✅ Deployment completed successfully!"
-          pm2 status
-          EOF
-        env:
-          DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/apps/mern-app
-      
-      - name: Verify deployment
-        run: |
-          echo "✅ Deployment workflow completed!"
-          echo "Server: https://${{ secrets.SSH_HOST }}"
-          echo "Check deployment status on hosting server: pm2 status"
-      
-      - name: Cleanup SSH
+      - name: Cleanup SSH key
         if: always()
         run: rm -f ~/.ssh/deploy_key
