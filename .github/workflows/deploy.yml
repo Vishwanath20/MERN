@@ -24,12 +24,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       
       # Build Server
-      - name: Install server dependencies
-        run: cd server && npm ci
-      
-      - name: Check server TypeScript
-        run: cd server && npm run build 2>/dev/null || true
-      
+      # - name: Install server dependencies
+      #   run: cd server && npm ci
+      #
+      # - name: Check server TypeScript
+      #   run: cd server && npm run build 2>/dev/null || true
+      #
       # Build Client
       - name: Install client dependencies
         run: cd client && npm ci
@@ -61,25 +61,10 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
       
-      - name: Deploy to hosting server
+      - name: Deploy client build to hosting server
         run: |
-          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
-          "DEPLOYMENT_PATH=$DEPLOYMENT_PATH" 'bash -s' << 'EOF'
-          set -e
-          
-          # Now $DEPLOYMENT_PATH will have the correct value
-          if [ ! -d "$DEPLOYMENT_PATH" ]; then
-            mkdir -p "$DEPLOYMENT_PATH"
-            cd "$DEPLOYMENT_PATH"
-            git clone https://github.com/${{ github.repository }}.git .
-          else
-            cd "$DEPLOYMENT_PATH"
-            git fetch origin
-            git reset --hard origin/main
-          fi
-          
-          # ... rest of your script ...
-          EOF
+          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "mkdir -p $DEPLOYMENT_PATH"
+          scp -P ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key -r client/dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:$DEPLOYMENT_PATH/
         env:
           DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/apps/mern-app
 
@@ -87,8 +72,8 @@ jobs:
       - name: Verify deployment
         run: |
           echo "✅ Deployment workflow completed!"
-          echo "🌐 Your app should be live at: https://${{ secrets.SSH_HOST }}"
-          echo "🔌 API available at: https://${{ secrets.SSH_HOST }}/api"
+          echo "🌐 Your client app should be live at: http://mern.epscg.in/"
+          echo "🔌 API available at: http://${{ secrets.SSH_HOST }}/api"
           echo "📊 Check server status: pm2 status (on your server)"
       
       - name: Cleanup SSH key
