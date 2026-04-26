@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/apps/mern-app
+  DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/public_html/mern
   NODE_VERSION: '22.x'
 
 jobs:
@@ -63,16 +63,18 @@ jobs:
       
       - name: Deploy client build to hosting server
         run: |
+          cd client && npm ci
+          cd client && npm run build
           ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "mkdir -p $DEPLOYMENT_PATH"
           scp -P ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key -r client/dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:$DEPLOYMENT_PATH/
         env:
-          DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/apps/mern-app
+          DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/public_html/mern
 
 
       - name: Verify deployment
         run: |
           echo "✅ Deployment workflow completed!"
-          echo "🌐 Your client app should be live at: http://mern.epscg.in/"
+          echo "🌐 Your client app should be live at: http://mern.epscg.in/mern"
           echo "🔌 API available at: http://${{ secrets.SSH_HOST }}/api"
           echo "📊 Check server status: pm2 status (on your server)"
       
