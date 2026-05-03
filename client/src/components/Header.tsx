@@ -26,7 +26,7 @@ export const Header = () => {
             >
               M
             </div>
-            <span className={`d-none d-sm-inline ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>MERN</span>
+            <span className={`d-none d-sm-inline ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>MERN-new</span>
           </Link>
 
           {/* Mobile Toggle Button */}

@@ -63,8 +63,8 @@ jobs:
       
       - name: Deploy client build to hosting server
         run: |
-          cd client && npm ci
-          cd client && npm run build
+          cd client && npm ci && npm run build
+          cd ..
           ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "mkdir -p $DEPLOYMENT_PATH"
           scp -P ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key -r client/dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:$DEPLOYMENT_PATH/
         env:
