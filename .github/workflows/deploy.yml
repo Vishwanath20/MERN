@@ -74,7 +74,7 @@ jobs:
       - name: Verify deployment
         run: |
           echo "✅ Deployment workflow completed!"
-          echo "🌐 Your client app should be live at: http://mern.epscg.in/mern"
+          echo "🌐 Your client app should be live at: http://mern.epscg.in/"
           echo "🔌 API available at: http://${{ secrets.SSH_HOST }}/api"
           echo "📊 Check server status: pm2 status (on your server)"
       
