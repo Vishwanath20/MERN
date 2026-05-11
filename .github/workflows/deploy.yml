@@ -69,8 +69,13 @@ jobs:
         run: |
           cd client && npm ci && npm run build
           cd ..
-          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "mkdir -p $DEPLOYMENT_PATH"
+          echo "📁 Build artifacts in client/dist/:"
+          ls -la client/dist/
+          echo "📤 Uploading to: $DEPLOYMENT_PATH"
+          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "mkdir -p $DEPLOYMENT_PATH && ls -la $DEPLOYMENT_PATH"
           scp -P ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key -r client/dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:$DEPLOYMENT_PATH/
+          echo "📋 Files uploaded to server:"
+          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "ls -la $DEPLOYMENT_PATH"
         env:
           DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/public_html/mern
 
