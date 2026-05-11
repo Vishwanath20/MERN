@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/public_html/mern
+  DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/domains/epscg.in/public_html/mern
   NODE_VERSION: '22.x'
 
 jobs:
@@ -77,14 +77,13 @@ jobs:
           echo "📋 Files uploaded to server:"
           ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "ls -la $DEPLOYMENT_PATH"
         env:
-          DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/public_html/mern
+          DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/domains/epscg.in/public_html/mern
 
       - name: Fix file permissions
         run: |
           ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "chmod -R 755 $DEPLOYMENT_PATH && find $DEPLOYMENT_PATH -type f -exec chmod 644 {} \;"
         env:
-          DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/public_html/mern
-
+          DEPLOYMENT_PATH: /home/${{ secrets.SSH_USERNAME }}/domains/epscg.in/public_html/mern
 
       - name: Verify deployment
         run: |
